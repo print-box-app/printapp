@@ -1,15 +1,8 @@
-{
-  "name": "Study Mate",
-  "short_name": "StudyMate",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0070f3",
-  "icons": [
+"icons": [
     {
-      "src": "583315.png",
-      "sizes": "512x512",
+      "src": "icon.png",  // print-box-icon.png
+    
+      "sizes": "1024x1024",
       "type": "image/png"
     }
   ]
-}
