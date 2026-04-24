@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="manifest" href="manifest.json">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#1a56a0">
+<title>プリント管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --blue:#1a56a0;--blue2:#2a6ec8;--blue-light:#e8f0fb;--blue-lighter:#f3f7fe;
+  --red:#d63c3c;--red-light:#fdeaea;
+  --green:#2e8a4a;--green-light:#e6f5eb;
+  --amber:#c47a10;--amber-light:#fdf3e3;
+  --gray:#6b7280;--gray-light:#f3f4f6;--gray2:#e5e7eb;
+  --text:#111827;--text2:#4b5563;--text3:#9ca3af;
+  --white:#ffffff;--bg:#f0f4fa;
+  --radius:12px;--radius-sm:8px;--radius-xs:6px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.10);
+}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;position:relative;overflow-x:hidden}
+
+/* ===== TOPBAR ===== */
+.topbar{background:var(--blue);padding:0;position:sticky;top:0;z-index:100}
+.topbar-main{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.topbar-title{color:#fff;font-size:18px;font-weight:700;letter-spacing:-0.3px}
+.topbar-actions{display:flex;gap:8px}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
+.icon-btn:active{background:rgba(255,255,255,0.3)}
+.search-wrap{padding:0 16px 12px}
+.search-box{background:rgba(255,255,255,0.18);border-radius:22px;display:flex;align-items:center;gap:8px;padding:9px 16px;cursor:text;border:1px solid rgba(255,255,255,0.15)}
+.search-box input{background:none;border:none;outline:none;color:#fff;font-size:14px;font-family:inherit;width:100%;caret-color:#fff}
+.search-box input::placeholder{color:rgba(255,255,255,0.6)}
+.search-icon{color:rgba(255,255,255,0.7);font-size:14px;flex-shrink:0}
+
+/* ===== TABS ===== */
+.tabs{background:var(--blue);display:flex;border-bottom:1px solid rgba(255,255,255,0.12);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{color:rgba(255,255,255,0.65);font-size:12px;font-weight:500;padding:9px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;font-family:inherit}
+.tab.active{color:#fff;border-bottom-color:#fff}
+
+/* ===== PAGES ===== */
+.page{display:none;padding-bottom:80px}
+.page.active{display:block}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--gray2);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;cursor:pointer;border:none;background:none;font-family:inherit}
+.nav-icon{font-size:20px;line-height:1}
+.nav-label{font-size:10px;color:var(--text3);font-weight:500}
+.nav-item.active .nav-label{color:var(--blue)}
+
+/* ===== SECTIONS ===== */
+.sec-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px}
+.sec-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px}
+.sec-action{font-size:12px;color:var(--blue);font-weight:500;cursor:pointer;background:none;border:none;font-family:inherit}
+
+/* ===== ALERT BANNER ===== */
+.alert-banner{margin:12px 16px 4px;background:var(--red-light);border:1px solid #f5c2c2;border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:10px}
+.alert-icon{font-size:18px;margin-top:1px;flex-shrink:0}
+.alert-body{}
+.alert-title{font-size:13px;font-weight:700;color:var(--red)}
+.alert-sub{font-size:11px;color:#9b3030;margin-top:2px}
+
+/* ===== FOLDER GRID ===== */
+.folder-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 4px}
+.folder-card{background:#fff;border-radius:var(--radius);border:1px solid var(--gray2);padding:14px 12px;cursor:pointer;transition:box-shadow 0.15s;box-shadow:var(--shadow)}
+.folder-card:active{box-shadow:var(--shadow-md)}
+.folder-emoji{font-size:24px;margin-bottom:6px}
+.folder-name{font-size:13px;font-weight:700;color:var(--text)}
+.folder-count{font-size:11px;color:var(--text3);margin-top:2px}
+.folder-bar{height:3px;border-radius:2px;margin-top:8px;background:var(--blue-light)}
+.folder-bar-fill{height:100%;border-radius:2px;background:var(--blue)}
+
+/* ===== PRINT LIST ===== */
+.print-list{padding:0 16px}
+.print-card{background:#fff;border-radius:var(--radius);border:1px solid var(--gray2);padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;box-shadow:var(--shadow);transition:box-shadow 0.15s;position:relative}
+.print-card:active{box-shadow:var(--shadow-md)}
+.print-thumb{width:46px;height:58px;border-radius:6px;background:var(--blue-lighter);border:1px solid var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden}
+.print-thumb img{width:100%;height:100%;object-fit:cover;border-radius:5px}
+.print-info{flex:1;min-width:0}
+.print-title{font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:60px}
+.print-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.print-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700}
+.tag-red{background:var(--red-light);color:var(--red)}
+.tag-blue{background:var(--blue-light);color:var(--blue)}
+.tag-green{background:var(--green-light);color:var(--green)}
+.tag-amber{background:var(--amber-light);color:var(--amber)}
+.tag-gray{background:var(--gray-light);color:var(--gray)}
+.deadline-badge{position:absolute;top:12px;right:12px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px}
+.deadline-urgent{background:var(--red-light);color:var(--red)}
+.deadline-soon{background:var(--amber-light);color:var(--amber)}
+.deadline-ok{background:var(--green-light);color:var(--green)}
+
+/* ===== FAB ===== */
+.fab{position:fixed;bottom:72px;right:calc(50% - 220px);width:54px;height:54px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(26,86,160,0.45);z-index:99;transition:transform 0.15s}
+.fab:active{transform:scale(0.94)}
+@media(max-width:480px){.fab{right:20px}}
+
+/* ===== MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px;max-height:90vh;overflow-y:auto;animation:slideUp 0.25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--gray2);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:5px;display:block}
+.form-input{width:100%;border:1.5px solid var(--gray2);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);outline:none;transition:border-color 0.15s;background:#fff}
+.form-input:focus{border-color:var(--blue)}
+.form-select{width:100%;border:1.5px solid var(--gray2);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);outline:none;background:#fff;appearance:none;cursor:pointer}
+.form-select:focus{border-color:var(--blue)}
+.tag-picker{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.tag-option{font-size:12px;padding:5px 12px;border-radius:20px;cursor:pointer;border:1.5px solid var(--gray2);background:#fff;font-family:inherit;font-weight:500;transition:all 0.15s}
+.tag-option.selected-red{background:var(--red-light);border-color:var(--red);color:var(--red)}
+.tag-option.selected-blue{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
+.tag-option.selected-green{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.tag-option.selected-amber{background:var(--amber-light);border-color:var(--amber);color:var(--amber)}
+.btn-primary{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;transition:background 0.15s}
+.btn-primary:active{background:var(--blue2)}
+.btn-secondary{width:100%;background:#fff;color:var(--text2);border:1.5px solid var(--gray2);border-radius:var(--radius);padding:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:8px;transition:background 0.15s}
+.btn-secondary:active{background:var(--gray-light)}
+.btn-danger{width:100%;background:var(--red-light);color:var(--red);border:1.5px solid #f5c2c2;border-radius:var(--radius);padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:8px}
+
+/* ===== CAMERA ===== */
+#cameraView{display:none;flex-direction:column;align-items:center;background:#000;min-height:100vh;position:fixed;inset:0;z-index:300}
+#cameraVideo{width:100%;max-width:480px;flex:1;object-fit:cover}
+.camera-controls{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(0,0,0,0.85);padding:20px;display:flex;align-items:center;justify-content:space-around}
+.cam-btn{width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px}
+.cam-btn-close{background:rgba(255,255,255,0.15);color:#fff}
+.cam-btn-shoot{width:68px;height:68px;background:#fff;border:4px solid rgba(255,255,255,0.4)}
+.cam-btn-flip{background:rgba(255,255,255,0.15);color:#fff}
+.cam-preview-strip{position:fixed;top:10px;right:10px;display:flex;flex-direction:column;gap:6px;z-index:301}
+.cam-preview-thumb{width:50px;height:64px;border-radius:6px;object-fit:cover;border:2px solid #fff}
+.cam-count-badge{position:fixed;top:14px;left:16px;background:var(--blue);color:#fff;font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;z-index:301}
+
+/* ===== DETAIL VIEW ===== */
+#detailView{display:none;position:fixed;inset:0;background:#fff;z-index:250;overflow-y:auto}
+.detail-topbar{background:#fff;position:sticky;top:0;display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--gray2);z-index:10}
+.back-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--blue);padding:4px}
+.detail-title-bar{font-size:15px;font-weight:700;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail-actions{display:flex;gap:8px}
+.detail-action-btn{background:none;border:none;font-size:18px;cursor:pointer;color:var(--blue)}
+.detail-images{padding:0}
+.detail-img-wrap{background:var(--gray-light);min-height:320px;display:flex;align-items:center;justify-content:center;position:relative}
+.detail-img-wrap img{max-width:100%;max-height:500px;object-fit:contain}
+.detail-img-placeholder{font-size:64px;opacity:0.3}
+.detail-body{padding:16px}
+.detail-info-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.detail-meta-item{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:4px}
+.detail-deadline-box{background:var(--red-light);border:1px solid #f5c2c2;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px}
+.detail-deadline-label{font-size:11px;font-weight:700;color:var(--red);margin-bottom:2px}
+.detail-deadline-val{font-size:16px;font-weight:700;color:var(--red)}
+.detail-desc{font-size:14px;color:var(--text2);line-height:1.7;background:var(--gray-light);border-radius:var(--radius-sm);padding:12px}
+
+/* ===== CALENDAR ===== */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 8px}
+.cal-month-label{font-size:16px;font-weight:700;color:var(--text)}
+.cal-nav-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--blue);padding:4px 8px}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;font-weight:700;color:var(--text3);padding:0 12px 4px}
+.cal-weekdays span:first-child{color:#e57373}
+.cal-weekdays span:last-child{color:#42a5f5}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);padding:0 12px;gap:2px}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;border-radius:50%;cursor:pointer;position:relative;color:var(--text)}
+.cal-day.sun{color:#e57373}
+.cal-day.sat{color:#42a5f5}
+.cal-day.other-month{color:var(--text3);opacity:0.5}
+.cal-day.today{background:var(--blue);color:#fff!important;font-weight:700}
+.cal-day.has-event::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--red);position:absolute;bottom:1px}
+.cal-day.today.has-event::after{background:#fff}
+.cal-events-section{padding:0 16px 80px}
+.cal-event-card{background:#fff;border-radius:var(--radius-sm);border-left:3px solid var(--blue);border-top:1px solid var(--gray2);border-right:1px solid var(--gray2);border-bottom:1px solid var(--gray2);padding:10px 12px;margin-bottom:8px;cursor:pointer}
+.cal-event-card.urgent{border-left-color:var(--red)}
+.cal-event-card.done{opacity:0.5}
+.cal-event-name{font-size:13px;font-weight:700;color:var(--text)}
+.cal-event-date{font-size:11px;color:var(--text3);margin-top:3px}
+.cal-event-tag{font-size:10px;color:var(--blue);font-weight:700;margin-top:4px}
+
+/* ===== SCAN PAGE ===== */
+.scan-hero{margin:16px;background:var(--blue-lighter);border:2px dashed var(--blue-light);border-radius:var(--radius);padding:36px 20px;text-align:center}
+.scan-hero-icon{font-size:48px;margin-bottom:10px}
+.scan-hero-title{font-size:16px;font-weight:700;color:var(--blue);margin-bottom:6px}
+.scan-hero-sub{font-size:12px;color:var(--text2);line-height:1.6}
+.scan-btn-row{display:flex;gap:10px;margin-top:18px;justify-content:center;flex-wrap:wrap}
+.scan-btn{display:flex;align-items:center;gap:6px;padding:10px 20px;border-radius:22px;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:opacity 0.15s}
+.scan-btn:active{opacity:0.8}
+.scan-btn-primary{background:var(--blue);color:#fff}
+.scan-btn-secondary{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+.scan-options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 16px}
+.scan-option{background:#fff;border:1px solid var(--gray2);border-radius:var(--radius);padding:16px 12px;text-align:center;cursor:pointer;transition:box-shadow 0.15s;box-shadow:var(--shadow)}
+.scan-option:active{box-shadow:var(--shadow-md)}
+.scan-option-icon{font-size:26px;margin-bottom:6px}
+.scan-option-label{font-size:13px;font-weight:700;color:var(--text)}
+.scan-option-sub{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.4}
+
+/* ===== CHECKLIST ===== */
+.checklist-wrap{padding:0 16px 80px}
+.check-item{background:#fff;border:1px solid var(--gray2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:var(--shadow)}
+.check-box{width:22px;height:22px;border-radius:6px;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
+.check-box.checked{background:var(--blue);border-color:var(--blue)}
+.check-box.checked::after{content:'✓';color:#fff;font-size:13px;font-weight:700}
+.check-label{font-size:14px;color:var(--text);font-weight:500}
+.check-label.done{text-decoration:line-through;color:var(--text3)}
+.check-subject{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* ===== SETTINGS ===== */
+.settings-wrap{padding:0 16px 80px}
+.setting-group{margin-bottom:20px}
+.setting-group-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;padding:14px 0 8px}
+.setting-item{background:#fff;border:1px solid var(--gray2);border-radius:var(--radius-sm);padding:13px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.setting-icon-wrap{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.setting-icon-blue{background:var(--blue-light)}
+.setting-icon-red{background:var(--red-light)}
+.setting-icon-green{background:var(--green-light)}
+.setting-icon-amber{background:var(--amber-light)}
+.setting-text{flex:1}
+.setting-label{font-size:14px;font-weight:500;color:var(--text)}
+.setting-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.toggle{width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+.toggle.on{background:var(--blue)}
+.toggle.off{background:var(--gray2)}
+.toggle-thumb{position:absolute;top:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);transition:left 0.2s}
+.toggle.on .toggle-thumb{left:22px}
+.toggle.off .toggle-thumb{left:2px}
+.chevron{color:var(--text3);font-size:14px}
+
+/* ===== SORT MENU ===== */
+.sort-menu{background:#fff;border-radius:var(--radius) var(--radius) 0 0;padding:16px}
+.sort-option{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--gray2);cursor:pointer;font-size:14px;color:var(--text);font-weight:500}
+.sort-option:last-child{border-bottom:none}
+.sort-option.active{color:var(--blue)}
+.sort-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--gray2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sort-option.active .sort-check{background:var(--blue);border-color:var(--blue)}
+.sort-option.active .sort-check::after{content:'✓';color:#fff;font-size:11px;font-weight:700}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3)}
+.empty-icon{font-size:48px;opacity:0.4;margin-bottom:12px}
+.empty-text{font-size:15px;font-weight:500;margin-bottom:6px;color:var(--text2)}
+.empty-sub{font-size:13px;line-height:1.6}
+
+/* ===== TIMETABLE ===== */
+.timetable-grid{overflow-x:auto;padding:0 16px}
+.timetable{width:100%;border-collapse:collapse;font-size:12px}
+.timetable th{background:var(--blue);color:#fff;padding:8px 4px;font-weight:700;text-align:center}
+.timetable td{border:1px solid var(--gray2);padding:8px 4px;text-align:center;background:#fff;cursor:pointer;min-width:44px}
+.timetable td:hover{background:var(--blue-lighter)}
+.timetable tr:first-child th:first-child{background:var(--blue)}
+.timetable .period{background:var(--gray-light);color:var(--text2);font-weight:700;cursor:default}
+.timetable td.filled{font-weight:700;color:var(--blue);background:var(--blue-lighter)}
+
+/* ===== MISC ===== */
+.divider{height:1px;background:var(--gray2);margin:12px 0}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding:0 16px}
+.chip{font-size:11px;padding:4px 12px;border-radius:20px;cursor:pointer;font-weight:700;border:1.5px solid var(--gray2);background:#fff;font-family:inherit;transition:all 0.15s}
+.chip.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.badge-count{display:inline-flex;align-items:center;justify-content:center;background:var(--red);color:#fff;font-size:10px;font-weight:700;border-radius:10px;min-width:18px;height:18px;padding:0 5px;margin-left:4px}
+
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;font-size:13px;font-weight:500;padding:10px 20px;border-radius:22px;z-index:999;display:none;white-space:nowrap;box-shadow:var(--shadow-md)}
+.toast.show{display:block;animation:fadeInOut 2.5s ease}
+@keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(-8px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}85%{opacity:1}100%{opacity:0}}
+
+#fileInput{display:none}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- TOPBAR -->
+<div class="topbar" id="topbar">
+  <div class="topbar-main">
+    <div class="topbar-title">📋 プリント管理</div>
+    <div class="topbar-actions">
+      <button class="icon-btn" onclick="openNotifModal()" title="通知">🔔<span class="badge-count" id="notifBadge" style="font-size:9px;min-width:14px;height:14px;position:absolute;margin-top:-8px;margin-left:-4px;display:none">!</span></button>
+      <button class="icon-btn" onclick="openSortMenu()">⇅</button>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="プリントを検索..." oninput="handleSearch(this.value)" autocomplete="off">
+    </div>
+  </div>
+  <div class="tabs" id="mainTabs">
+    <div class="tab active" onclick="switchPage('home',this)">ホーム</div>
+    <div class="tab" onclick="switchPage('calendar',this)">📅 カレンダー</div>
+    <div class="tab" onclick="switchPage('checklist',this)">✅ 忘れ物</div>
+    <div class="tab" onclick="switchPage('timetable',this)">🗓 時間割</div>
+    <div class="tab" onclick="switchPage('settings',this)">⚙️ 設定</div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-item active" id="nav-home" onclick="switchPage('home',null,'home')">
+    <span class="nav-icon">🏠</span><span class="nav-label">ホーム</span>
+  </button>
+  <button class="nav-item" id="nav-scan" onclick="switchPage('scan',null,'scan')">
+    <span class="nav-icon">📷</span><span class="nav-label">スキャン</span>
+  </button>
+  <button class="nav-item" id="nav-calendar" onclick="switchPage('calendar',null,'calendar')">
+    <span class="nav-icon">📅</span><span class="nav-label">カレンダー</span>
+  </button>
+  <button class="nav-item" id="nav-settings" onclick="switchPage('settings',null,'settings')">
+    <span class="nav-icon">⚙️</span><span class="nav-label">設定</span>
+  </button>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="mainFab" onclick="openAddModal()">＋</button>
+
+<!-- ===== PAGES ===== -->
+<div id="page-home" class="page active">
+  <div id="urgentBanner"></div>
+  <div class="sec-header">
+    <span class="sec-title">フォルダ</span>
+    <button class="sec-action" onclick="openFolderModal()">＋ 追加</button>
+  </div>
+  <div class="folder-grid" id="folderGrid"></div>
+  <div style="height:12px"></div>
+  <div class="sec-header">
+    <span class="sec-title" id="listSectionTitle">すべてのプリント</span>
+    <button class="sec-action" onclick="openSortMenu()">並び替え</button>
+  </div>
+  <div class="chip-row" id="filterChips"></div>
+  <div class="print-list" id="printList"></div>
+</div>
+
+<div id="page-scan" class="page">
+  <div class="scan-hero">
+    <div class="scan-hero-icon">📷</div>
+    <div class="scan-hero-title">プリントをスキャン・取り込み</div>
+    <div class="scan-hero-sub">カメラで撮影するだけ。自動補正で<br>きれいに保存できます</div>
+    <div class="scan-btn-row">
+      <button class="scan-btn scan-btn-primary" onclick="openCamera()">📸 カメラで撮影</button>
+      <button class="scan-btn scan-btn-secondary" onclick="document.getElementById('fileInput').click()">📁 ライブラリから</button>
+    </div>
+  </div>
+  <div class="sec-header"><span class="sec-title">その他の操作</span></div>
+  <div class="scan-options-grid">
+    <div class="scan-option" onclick="showToast('PDF読み込み機能（開発中）')">
+      <div class="scan-option-icon">📄</div>
+      <div class="scan-option-label">PDFを読み込む</div>
+      <div class="scan-option-sub">自動でページ分割</div>
+    </div>
+    <div class="scan-option" onclick="exportPDF()">
+      <div class="scan-option-icon">📤</div>
+      <div class="scan-option-label">PDFで書き出す</div>
+      <div class="scan-option-sub">印刷・共有用</div>
+    </div>
+    <div class="scan-option" onclick="shareApp()">
+      <div class="scan-option-icon">🔗</div>
+      <div class="scan-option-label">プリントを共有</div>
+      <div class="scan-option-sub">友達と共有</div>
+    </div>
+    <div class="scan-option" onclick="showToast('お気に入り一覧を表示')">
+      <div class="scan-option-icon">⭐</div>
+      <div class="scan-option-label">お気に入り</div>
+      <div class="scan-option-sub">重要なプリント</div>
+    </div>
+  </div>
+  <div class="sec-header"><span class="sec-title">最近スキャンしたプリント</span></div>
+  <div class="print-list" id="recentScanList"></div>
+</div>
+
+<div id="page-calendar" class="page">
+  <div class="cal-nav">
+    <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+    <div class="cal-month-label" id="calMonthLabel"></div>
+    <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+  </div>
+  <div class="cal-weekdays">
+    <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+  </div>
+  <div class="cal-days" id="calDays"></div>
+  <div style="height:16px"></div>
+  <div class="sec-header"><span class="sec-title" id="calEventsTitle">今月の提出・予定</span></div>
+  <div class="cal-events-section" id="calEventsList"></div>
+</div>
+
+<div id="page-checklist" class="page">
+  <div class="sec-header">
+    <span class="sec-title">忘れ物チェック</span>
+    <button class="sec-action" onclick="openCheckItemModal()">＋ 追加</button>
+  </div>
+  <div class="checklist-wrap" id="checklistWrap"></div>
+</div>
+
+<div id="page-timetable" class="page">
+  <div class="sec-header">
+    <span class="sec-title">時間割</span>
+    <button class="sec-action" onclick="editTimetable()">編集</button>
+  </div>
+  <div class="timetable-grid">
+    <table class="timetable" id="timetableEl"></table>
+  </div>
+  <div style="height:16px"></div>
+  <div class="sec-header"><span class="sec-title">今日の授業</span></div>
+  <div class="print-list" id="todayPrints"></div>
+</div>
+
+<div id="page-settings" class="page">
+  <div class="settings-wrap">
+    <div class="setting-group">
+      <div class="setting-group-title">通知・リマインダー</div>
+      <div class="setting-item" onclick="toggleSetting('notif_deadline')">
+        <div class="setting-icon-wrap setting-icon-red">🔔</div>
+        <div class="setting-text">
+          <div class="setting-label">提出期限リマインダー</div>
+          <div class="setting-sub">3日前・前日・当日に通知</div>
+        </div>
+        <div class="toggle on" id="toggle-notif_deadline"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="setting-item" onclick="toggleSetting('notif_morning')">
+        <div class="setting-icon-wrap setting-icon-amber">⏰</div>
+        <div class="setting-text">
+          <div class="setting-label">朝のリマインダー</div>
+          <div class="setting-sub">登校前に今日の持ち物を通知</div>
+        </div>
+        <div class="toggle on" id="toggle-notif_morning"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+    <div class="setting-group">
+      <div class="setting-group-title">カレンダー・連携</div>
+      <div class="setting-item" onclick="toggleSetting('cal_sync')">
+        <div class="setting-icon-wrap setting-icon-blue">📅</div>
+        <div class="setting-text">
+          <div class="setting-label">カレンダー連携</div>
+          <div class="setting-sub">提出物を予定表に追加</div>
+        </div>
+        <div class="toggle on" id="toggle-cal_sync"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="setting-item" onclick="toggleSetting('chikuma_sync')">
+        <div class="setting-icon-wrap setting-icon-green">🏫</div>
+        <div class="setting-text">
+          <div class="setting-label">千曲市年間予定と連携</div>
+          <div class="setting-sub">学校行事を自動取得</div>
+        </div>
+        <div class="toggle off" id="toggle-chikuma_sync"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+    <div class="setting-group">
+      <div class="setting-group-title">表示・機能</div>
+      <div class="setting-item" onclick="toggleSetting('offline')">
+        <div class="setting-icon-wrap setting-icon-blue">📥</div>
+        <div class="setting-text">
+          <div class="setting-label">オフライン閲覧</div>
+          <div class="setting-sub">Wi-Fiなしでも閲覧可能</div>
+        </div>
+        <div class="toggle on" id="toggle-offline"><div class="toggle-thumb"></div></div>
+      </div>
+      <div class="setting-item" onclick="toggleSetting('auto_correct')">
+        <div class="setting-icon-wrap setting-icon-amber">✨</div>
+        <div class="setting-text">
+          <div class="setting-label">自動スキャン補正</div>
+          <div class="setting-sub">傾きと歪みを自動修正</div>
+        </div>
+        <div class="toggle on" id="toggle-auto_correct"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+    <div class="setting-group">
+      <div class="setting-group-title">データ管理</div>
+      <div class="setting-item" onclick="exportData()">
+        <div class="setting-icon-wrap setting-icon-blue">📤</div>
+        <div class="setting-text">
+          <div class="setting-label">データをエクスポート</div>
+          <div class="setting-sub">全データをJSONで保存</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="setting-item" onclick="document.getElementById('importInput').click()">
+        <div class="setting-icon-wrap setting-icon-green">📥</div>
+        <div class="setting-text">
+          <div class="setting-label">データをインポート</div>
+          <div class="setting-sub">バックアップから復元</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+      <div class="setting-item" onclick="clearAllData()">
+        <div class="setting-icon-wrap setting-icon-red">🗑️</div>
+        <div class="setting-text">
+          <div class="setting-label">全データを削除</div>
+          <div class="setting-sub">元には戻せません</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+    <div style="text-align:center;padding:16px 0;font-size:11px;color:var(--text3)">プリント管理 v1.0 · ローカル保存</div>
+  </div>
+</div>
+<input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
+
+<!-- ===== CAMERA VIEW ===== -->
+<div id="cameraView">
+  <div class="cam-count-badge" id="camCountBadge" style="display:none">0枚</div>
+  <div class="cam-preview-strip" id="camPreviewStrip"></div>
+  <video id="cameraVideo" autoplay playsinline muted></video>
+  <canvas id="snapCanvas" style="display:none"></canvas>
+  <div class="camera-controls">
+    <button class="cam-btn cam-btn-close" onclick="closeCamera()">✕</button>
+    <button class="cam-btn cam-btn-shoot" onclick="shootPhoto()"></button>
+    <button class="cam-btn cam-btn-flip" onclick="flipCamera()">🔄</button>
+  </div>
+</div>
+
+<!-- ===== DETAIL VIEW ===== -->
+<div id="detailView">
+  <div class="detail-topbar">
+    <button class="back-btn" onclick="closeDetail()">‹</button>
+    <div class="detail-title-bar" id="detailTitle"></div>
+    <div class="detail-actions">
+      <button class="detail-action-btn" onclick="toggleFavorite()" id="favBtn">☆</button>
+      <button class="detail-action-btn" onclick="editCurrentPrint()">✏️</button>
+      <button class="detail-action-btn" onclick="sharePrint()">📤</button>
+      <button class="detail-action-btn" onclick="deleteCurrentPrint()" style="color:var(--red)">🗑</button>
+    </div>
+  </div>
+  <div id="detailContent"></div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<!-- Add/Edit Print Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="addModalTitle">プリントを追加</div>
+    <div class="form-group">
+      <label class="form-label">タイトル *</label>
+      <input type="text" class="form-input" id="printTitle" placeholder="例: 二次方程式プリント" maxlength="50">
+    </div>
+    <div class="form-group">
+      <label class="form-label">フォルダ（教科）</label>
+      <select class="form-select" id="printFolder"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">タグ</label>
+      <div class="tag-picker" id="tagPicker">
+        <button class="tag-option" data-tag="提出物" data-color="red" onclick="toggleTag(this)">📤 提出物</button>
+        <button class="tag-option" data-tag="テスト範囲" data-color="blue" onclick="toggleTag(this)">📝 テスト範囲</button>
+        <button class="tag-option" data-tag="重要" data-color="green" onclick="toggleTag(this)">⚠️ 重要</button>
+        <button class="tag-option" data-tag="お気に入り" data-color="amber" onclick="toggleTag(this)">⭐ お気に入り</button>
+        <button class="tag-option" data-tag="返却物" data-color="gray" onclick="toggleTag(this)">↩️ 返却物</button>
+      </div>
+    </div>
+    <div class="form-group" id="deadlineGroup">
+      <label class="form-label">提出期限</label>
+      <input type="date" class="form-input" id="printDeadline">
+    </div>
+    <div class="form-group">
+      <label class="form-label">メモ</label>
+      <textarea class="form-input" id="printMemo" rows="3" placeholder="内容や注意事項など..." style="resize:none"></textarea>
+    </div>
+    <button class="btn-primary" onclick="savePrint()">💾 保存する</button>
+    <button class="btn-secondary" onclick="closeModal('addModal')">キャンセル</button>
+  </div>
+</div>
+
+<!-- Folder Modal -->
+<div class="modal-overlay" id="folderModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">フォルダを追加</div>
+    <div class="form-group">
+      <label class="form-label">フォルダ名</label>
+      <input type="text" class="form-input" id="folderName" placeholder="例: 数学" maxlength="20">
+    </div>
+    <div class="form-group">
+      <label class="form-label">アイコン</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px" id="iconPicker">
+        <span style="font-size:24px;cursor:pointer;padding:4px" onclick="selectIcon(this)" data-icon="📐">📐</span>
+        <span style="font-size:24px;cursor:pointer;padding:4px" onclick="selectIcon(this)" data-icon="🧬">🧬</span>
+        <span style="font-size:24px;cursor:pointer;padding:4px" onclick="selectIcon(this)" data-icon="📖">📖</span>
+        <span style="font-size:24px;cursor:pointer;padding:4px" onclick="selectIcon(this)" data-icon="🌍">🌍</span>
+        <span style="font-size:24px;cursor:pointer;padding:4px" onclick="selectIcon(this)" data-icon="💻">💻</span>
+        <span style="font-size:24px;cursor:pointer;padding:4px" onclick="selectIcon(this)" data-icon="🎨">🎨</span>
+        <span style="font-size:24px;cursor:pointer;padding:4px" onclick="selectIcon(this)" data-icon="🎵">🎵</span>
+        <span style="font-size:24px;cursor:pointer;padding:4px" onclick="selectIcon(this)" data-icon="🏃">🏃</span>
+        <span style="font-size:24px;cursor:pointer;padding:4px" onclick="selectIcon(this)" data-icon="🏫">🏫</span>
+        <span style="font-size:24px;cursor:pointer;padding:4px" onclick="selectIcon(this)" data-icon="📁">📁</span>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="saveFolder()">追加する</button>
+    <button class="btn-secondary" onclick="closeModal('folderModal')">キャンセル</button>
+  </div>
+</div>
+
+<!-- Sort Menu Modal -->
+<div class="modal-overlay" id="sortModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">並び替え</div>
+    <div class="sort-menu">
+      <div class="sort-option" onclick="setSortMode('date-desc',this)"><div class="sort-check"></div>新しい順</div>
+      <div class="sort-option" onclick="setSortMode('date-asc',this)"><div class="sort-check"></div>古い順</div>
+      <div class="sort-option" onclick="setSortMode('deadline',this)"><div class="sort-check"></div>期限が近い順</div>
+      <div class="sort-option" onclick="setSortMode('folder',this)"><div class="sort-check"></div>教科順</div>
+      <div class="sort-option" onclick="setSortMode('title',this)"><div class="sort-check"></div>タイトル順（あいうえお）</div>
+    </div>
+    <button class="btn-secondary" onclick="closeModal('sortModal')">閉じる</button>
+  </div>
+</div>
+
+<!-- CheckItem Modal -->
+<div class="modal-overlay" id="checkItemModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">持ち物を追加</div>
+    <div class="form-group">
+      <label class="form-label">アイテム名</label>
+      <input type="text" class="form-input" id="checkItemName" placeholder="例: 理科の教科書" maxlength="30">
+    </div>
+    <div class="form-group">
+      <label class="form-label">教科・メモ</label>
+      <input type="text" class="form-input" id="checkItemSubject" placeholder="例: 理科" maxlength="20">
+    </div>
+    <button class="btn-primary" onclick="saveCheckItem()">追加する</button>
+    <button class="btn-secondary" onclick="closeModal('checkItemModal')">キャンセル</button>
+  </div>
+</div>
+
+<!-- Notif Modal -->
+<div class="modal-overlay" id="notifModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">通知・リマインダー</div>
+    <div id="notifList"></div>
+    <button class="btn-secondary" onclick="closeModal('notifModal')">閉じる</button>
+  </div>
+</div>
+
+<!-- Timetable Edit Modal -->
+<div class="modal-overlay" id="timetableModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">時間割を編集</div>
+    <div class="form-group">
+      <label class="form-label">曜日</label>
+      <select class="form-select" id="ttDay">
+        <option value="1">月曜日</option><option value="2">火曜日</option>
+        <option value="3">水曜日</option><option value="4">木曜日</option>
+        <option value="5">金曜日</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">時限</label>
+      <select class="form-select" id="ttPeriod">
+        <option value="0">1限</option><option value="1">2限</option>
+        <option value="2">3限</option><option value="3">4限</option>
+        <option value="4">5限</option><option value="5">6限</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">教科</label>
+      <input type="text" class="form-input" id="ttSubject" placeholder="例: 数学" maxlength="10">
+    </div>
+    <button class="btn-primary" onclick="saveTimetableCell()">保存する</button>
+    <button class="btn-secondary" onclick="closeModal('timetableModal')">キャンセル</button>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" multiple onchange="handleFileInput(event)">
+
+<script>
+// ===== DATA STORE =====
+let db = {
+  prints: [],
+  folders: [
+    {id:'f1',name:'数学',icon:'📐'},
+    {id:'f2',name:'理科',icon:'🧬'},
+    {id:'f3',name:'国語',icon:'📖'},
+    {id:'f4',name:'社会',icon:'🌍'},
+  ],
+  checkItems: [
+    {id:'c1',label:'教科書（数学）',subject:'数学',checked:false},
+    {id:'c2',label:'ノート（理科）',subject:'理科',checked:false},
+    {id:'c3',label:'体操服',subject:'体育',checked:false},
+    {id:'c4',label:'水筒',subject:'',checked:false},
+  ],
+  timetable: [
+    ['数学','国語','理科','社会','英語','体育'],
+    ['英語','数学','社会','理科','国語',''],
+    ['理科','社会','数学','英語','体育',''],
+    ['国語','英語','理科','数学','社会',''],
+    ['社会','体育','英語','国語','数学',''],
+  ],
+  settings: {notif_deadline:true,notif_morning:true,cal_sync:true,chikuma_sync:false,offline:true,auto_correct:true},
+  sortMode: 'date-desc',
+  activeFolder: null,
+  activeTags: [],
+};
+
+let editingPrintId = null;
+let currentDetailId = null;
+let camStream = null;
+let camFacing = 'environment';
+let capturedPhotos = [];
+let selectedIcon = '📁';
+let calViewDate = new Date();
+
+// ===== INIT =====
+function init() {
+  loadData();
+  renderFolders();
+  renderPrints();
+  renderCalendar();
+  renderChecklist();
+  renderTimetable();
+  checkUrgent();
+  updateFolderSelect();
+}
+
+// ===== STORAGE =====
+function saveData() {
+  try { localStorage.setItem('printkanri_db', JSON.stringify(db)); } catch(e){}
+}
+function loadData() {
+  try {
+    const s = localStorage.getItem('printkanri_db');
+    if (s) {
+      const loaded = JSON.parse(s);
+      if (loaded.prints) db.prints = loaded.prints;
+      if (loaded.folders) db.folders = loaded.folders;
+      if (loaded.checkItems) db.checkItems = loaded.checkItems;
+      if (loaded.timetable) db.timetable = loaded.timetable;
+      if (loaded.settings) db.settings = {...db.settings,...loaded.settings};
+      if (loaded.sortMode) db.sortMode = loaded.sortMode;
+    }
+  } catch(e){}
+}
+
+// ===== NAVIGATION =====
+function switchPage(name, tabEl, navId) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (tabEl) {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tabEl.classList.add('active');
+  }
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if (navId) document.getElementById('nav-'+navId)?.classList.add('active');
+  const fabPages = {home:true,scan:false,calendar:false,checklist:true,timetable:false,settings:false};
+  document.getElementById('mainFab').style.display = fabPages[name]===false ? 'none' : 'flex';
+  if (name==='checklist') document.getElementById('mainFab').onclick = openCheckItemModal;
+  else document.getElementById('mainFab').onclick = openAddModal;
+  if (name==='scan') renderRecentScans();
+  if (name==='timetable') renderTodayPrints();
+  if (name==='calendar') renderCalendar();
+}
+
+// ===== MODALS =====
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow='';
+}
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click', e=>{ if(e.target===el) closeModal(el.id); });
+});
+
+// ===== ADD/EDIT PRINT =====
+function openAddModal(folderId) {
+  editingPrintId = null;
+  document.getElementById('addModalTitle').textContent = 'プリントを追加';
+  document.getElementById('printTitle').value='';
+  document.getElementById('printMemo').value='';
+  document.getElementById('printDeadline').value='';
+  document.querySelectorAll('.tag-option').forEach(t=>{
+    t.className='tag-option';
+  });
+  updateFolderSelect();
+  if (folderId) document.getElementById('printFolder').value = folderId;
+  else if (db.activeFolder) document.getElementById('printFolder').value = db.activeFolder;
+  openModal('addModal');
+  setTimeout(()=>document.getElementById('printTitle').focus(),300);
+}
+function editCurrentPrint() {
+  const p = db.prints.find(x=>x.id===currentDetailId);
+  if (!p) return;
+  closeDetail();
+  editingPrintId = p.id;
+  document.getElementById('addModalTitle').textContent = 'プリントを編集';
+  document.getElementById('printTitle').value = p.title;
+  document.getElementById('printMemo').value = p.memo||'';
+  document.getElementById('printDeadline').value = p.deadline||'';
+  updateFolderSelect();
+  document.getElementById('printFolder').value = p.folderId||'';
+  document.querySelectorAll('.tag-option').forEach(t=>{
+    t.className='tag-option';
+    if (p.tags && p.tags.includes(t.dataset.tag)) {
+      t.classList.add('selected-'+t.dataset.color);
+    }
+  });
+  openModal('addModal');
+}
+function toggleTag(el) {
+  const color = el.dataset.color;
+  const cls = 'selected-'+color;
+  if (el.classList.contains(cls)) el.className='tag-option';
+  else { el.className='tag-option'; el.classList.add(cls); }
+}
+function savePrint() {
+  const title = document.getElementById('printTitle').value.trim();
+  if (!title) { showToast('タイトルを入力してください'); return; }
+  const tags = [];
+  document.querySelectorAll('.tag-option').forEach(t=>{
+    if (t.className !== 'tag-option') tags.push(t.dataset.tag);
+  });
+  const data = {
+    title,
+    folderId: document.getElementById('printFolder').value,
+    tags,
+    deadline: document.getElementById('printDeadline').value,
+    memo: document.getElementById('printMemo').value.trim(),
+    date: new Date().toISOString(),
+  };
+  if (editingPrintId) {
+    const idx = db.prints.findIndex(x=>x.id===editingPrintId);
+    if (idx>=0) { db.prints[idx] = {...db.prints[idx],...data}; }
+  } else {
+    data.id = 'p'+Date.now();
+    db.prints.unshift(data);
+  }
+  saveData();
+  closeModal('addModal');
+  renderFolders();
+  renderPrints();
+  renderCalendar();
+  checkUrgent();
+  showToast(editingPrintId ? '✅ 更新しました' : '✅ 保存しました');
+}
+
+// ===== FOLDERS =====
+function openFolderModal() {
+  document.getElementById('folderName').value='';
+  selectedIcon='📁';
+  document.querySelectorAll('#iconPicker span').forEach(s=>s.style.background='');
+  openModal('folderModal');
+  setTimeout(()=>document.getElementById('folderName').focus(),300);
+}
+function selectIcon(el) {
+  document.querySelectorAll('#iconPicker span').forEach(s=>s.style.background='');
+  el.style.background='var(--blue-light)';
+  el.style.borderRadius='8px';
+  selectedIcon = el.dataset.icon;
+}
+function saveFolder() {
+  const name = document.getElementById('folderName').value.trim();
+  if (!name) { showToast('フォルダ名を入力してください'); return; }
+  db.folders.push({id:'f'+Date.now(),name,icon:selectedIcon});
+  saveData();
+  closeModal('folderModal');
+  renderFolders();
+  updateFolderSelect();
+  showToast('📁 フォルダを追加しました');
+}
+function renderFolders() {
+  const grid = document.getElementById('folderGrid');
+  grid.innerHTML = db.folders.map(f=>{
+    const count = db.prints.filter(p=>p.folderId===f.id).length;
+    const pct = Math.min(100, count*10);
+    return `<div class="folder-card" onclick="filterByFolder('${f.id}')">
+      <div class="folder-emoji">${f.icon}</div>
+      <div class="folder-name">${f.name}</div>
+      <div class="folder-count">${count}枚</div>
+      <div class="folder-bar"><div class="folder-bar-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+function filterByFolder(fid) {
+  db.activeFolder = db.activeFolder===fid ? null : fid;
+  db.activeTags = [];
+  renderPrints();
+  renderFilterChips();
+}
+function updateFolderSelect() {
+  const sel = document.getElementById('printFolder');
+  sel.innerHTML = '<option value="">フォルダなし</option>' +
+    db.folders.map(f=>`<option value="${f.id}">${f.icon} ${f.name}</option>`).join('');
+}
+
+// ===== RENDER PRINTS =====
+function renderPrints(searchQuery) {
+  let prints = [...db.prints];
+  if (db.activeFolder) prints = prints.filter(p=>p.folderId===db.activeFolder);
+  if (db.activeTags.length) prints = prints.filter(p=>db.activeTags.every(t=>p.tags&&p.tags.includes(t)));
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    prints = prints.filter(p=>p.title.toLowerCase().includes(q)||(p.memo&&p.memo.toLowerCase().includes(q)));
+  }
+  prints = sortPrints(prints);
+  const folder = db.activeFolder ? db.folders.find(f=>f.id===db.activeFolder) : null;
+  document.getElementById('listSectionTitle').textContent = folder ? `${folder.icon} ${folder.name}` : 'すべてのプリント';
+  renderFilterChips();
+  const list = document.getElementById('printList');
+  if (!prints.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">プリントがありません</div><div class="empty-sub">右下の＋ボタンから追加しましょう</div></div>`;
+    return;
+  }
+  list.innerHTML = prints.map(p=>printCardHTML(p)).join('');
+}
+function sortPrints(prints) {
+  switch(db.sortMode) {
+    case 'date-asc': return prints.sort((a,b)=>new Date(a.date)-new Date(b.date));
+    case 'deadline': return prints.sort((a,b)=>{
+      if (!a.deadline&&!b.deadline) return 0;
+      if (!a.deadline) return 1; if (!b.deadline) return -1;
+      return new Date(a.deadline)-new Date(b.deadline);
+    });
+    case 'folder': return prints.sort((a,b)=>(a.folderId||'').localeCompare(b.folderId||''));
+    case 'title': return prints.sort((a,b)=>a.title.localeCompare(b.title,'ja'));
+    default: return prints.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  }
+}
+function printCardHTML(p) {
+  const folder = db.folders.find(f=>f.id===p.folderId);
+  const tags = (p.tags||[]).map(t=>{
+    const colorMap={'提出物':'red','テスト範囲':'blue','重要':'green','お気に入り':'amber','返却物':'gray'};
+    return `<span class="tag tag-${colorMap[t]||'gray'}">${t}</span>`;
+  }).join('');
+  let deadlineHTML = '';
+  if (p.deadline) {
+    const diff = Math.ceil((new Date(p.deadline)-new Date())/(1000*60*60*24));
+    if (diff<0) deadlineHTML=`<div class="deadline-badge deadline-urgent">期限切れ</div>`;
+    else if (diff===0) deadlineHTML=`<div class="deadline-badge deadline-urgent">今日まで</div>`;
+    else if (diff===1) deadlineHTML=`<div class="deadline-badge deadline-urgent">明日まで</div>`;
+    else if (diff<=3) deadlineHTML=`<div class="deadline-badge deadline-soon">${diff}日後</div>`;
+    else deadlineHTML=`<div class="deadline-badge deadline-ok">${p.deadline.replace(/-/g,'/')}</div>`;
+  }
+  const thumb = p.imageData ? `<img src="${p.imageData}" alt="">` : '📄';
+  const thumbContent = p.imageData ? `<img src="${p.imageData}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:5px">` : '📄';
+  const dateStr = new Date(p.date).toLocaleDateString('ja-JP',{month:'short',day:'numeric'});
+  return `<div class="print-card" onclick="openDetail('${p.id}')">
+    <div class="print-thumb">${thumbContent}</div>
+    <div class="print-info">
+      <div class="print-title">${escHtml(p.title)}</div>
+      <div class="print-meta">${folder?folder.icon+' '+folder.name:'フォルダなし'} · ${dateStr}取り込み</div>
+      <div class="print-tags">${tags}</div>
+    </div>
+    ${deadlineHTML}
+  </div>`;
+}
+
+// ===== FILTER CHIPS =====
+function renderFilterChips() {
+  const allTags = ['提出物','テスト範囲','重要','お気に入り','返却物'];
+  const colorMap={'提出物':'red','テスト範囲':'blue','重要':'green','お気に入り':'amber','返却物':'gray'};
+  document.getElementById('filterChips').innerHTML = allTags.map(t=>
+    `<button class="chip ${db.activeTags.includes(t)?'active':''}" onclick="toggleTagFilter('${t}')">${t}</button>`
+  ).join('');
+}
+function toggleTagFilter(tag) {
+  const idx = db.activeTags.indexOf(tag);
+  if (idx>=0) db.activeTags.splice(idx,1); else db.activeTags.push(tag);
+  renderPrints();
+}
+
+// ===== SEARCH =====
+function handleSearch(q) {
+  renderPrints(q);
+}
+
+// ===== DETAIL =====
+function openDetail(id) {
+  const p = db.prints.find(x=>x.id===id);
+  if (!p) return;
+  currentDetailId = id;
+  document.getElementById('detailTitle').textContent = p.title;
+  document.getElementById('favBtn').textContent = (p.tags&&p.tags.includes('お気に入り')) ? '★' : '☆';
+  const folder = db.folders.find(f=>f.id===p.folderId);
+  const tags = (p.tags||[]).map(t=>{
+    const colorMap={'提出物':'red','テスト範囲':'blue','重要':'green','お気に入り':'amber','返却物':'gray'};
+    return `<span class="tag tag-${colorMap[t]||'gray'}">${t}</span>`;
+  }).join('');
+  let deadlineHTML='';
+  if (p.deadline) {
+    const diff = Math.ceil((new Date(p.deadline)-new Date())/(1000*60*60*24));
+    const urgentClass = diff<=1?'deadline-urgent':diff<=3?'deadline-soon':'deadline-ok';
+    deadlineHTML=`<div class="detail-deadline-box"><div class="detail-deadline-label">提出期限</div><div class="detail-deadline-val">📅 ${p.deadline.replace(/-/g,'/')} ${diff<0?'（期限切れ）':diff===0?'（今日）':diff===1?'（明日）':''}</div></div>`;
+  }
+  let imgHTML='';
+  if (p.imageData) imgHTML=`<div class="detail-img-wrap"><img src="${p.imageData}" alt="プリント画像"></div>`;
+  else imgHTML=`<div class="detail-img-wrap"><div class="detail-img-placeholder">📄</div></div>`;
+  document.getElementById('detailContent').innerHTML = `
+    ${imgHTML}
+    <div class="detail-body">
+      <div class="detail-info-row">
+        <span class="detail-meta-item">📁 ${folder?folder.name:'フォルダなし'}</span>
+        <span class="detail-meta-item">📅 ${new Date(p.date).toLocaleDateString('ja-JP')}</span>
+      </div>
+      ${deadlineHTML}
+      <div class="print-tags" style="margin-bottom:14px">${tags}</div>
+      ${p.memo?`<div class="detail-desc">${escHtml(p.memo)}</div>`:''}
+      <button class="btn-secondary" style="margin-top:16px" onclick="exportSinglePDF('${p.id}')">📤 PDFで書き出す</button>
+    </div>`;
+  document.getElementById('detailView').style.display='block';
+}
+function closeDetail() {
+  document.getElementById('detailView').style.display='none';
+  currentDetailId=null;
+}
+function toggleFavorite() {
+  const p = db.prints.find(x=>x.id===currentDetailId);
+  if (!p) return;
+  if (!p.tags) p.tags=[];
+  const idx=p.tags.indexOf('お気に入り');
+  if (idx>=0) { p.tags.splice(idx,1); document.getElementById('favBtn').textContent='☆'; showToast('お気に入りを外しました'); }
+  else { p.tags.push('お気に入り'); document.getElementById('favBtn').textContent='★'; showToast('⭐ お気に入りに追加'); }
+  saveData(); renderPrints();
+}
+function deleteCurrentPrint() {
+  if (!confirm('このプリントを削除しますか？')) return;
+  db.prints = db.prints.filter(x=>x.id!==currentDetailId);
+  saveData(); closeDetail(); renderFolders(); renderPrints(); checkUrgent();
+  showToast('🗑 削除しました');
+}
+function sharePrint() {
+  const p = db.prints.find(x=>x.id===currentDetailId);
+  if (!p) return;
+  if (navigator.share) {
+    navigator.share({title:p.title,text:`${p.title}\n期限:${p.deadline||'なし'}\n${p.memo||''}`});
+  } else { showToast('共有機能は対応ブラウザのみ'); }
+}
+
+// ===== SORT =====
+function openSortMenu() {
+  document.querySelectorAll('.sort-option').forEach(o=>o.classList.remove('active'));
+  const modeEl = document.querySelector(`.sort-option[onclick*="${db.sortMode}"]`);
+  if (modeEl) modeEl.classList.add('active');
+  openModal('sortModal');
+}
+function setSortMode(mode,el) {
+  db.sortMode=mode;
+  saveData();
+  document.querySelectorAll('.sort-option').forEach(o=>o.classList.remove('active'));
+  el.classList.add('active');
+  closeModal('sortModal');
+  renderPrints();
+}
+
+// ===== URGENT BANNER =====
+function checkUrgent() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const urgent = db.prints.filter(p=>{
+    if (!p.deadline) return false;
+    const d=new Date(p.deadline); d.setHours(0,0,0,0);
+    return (d-today)/(1000*60*60*24)<=1;
+  });
+  const el=document.getElementById('urgentBanner');
+  if (urgent.length) {
+    const p=urgent[0];
+    const diff=Math.ceil((new Date(p.deadline)-today)/(1000*60*60*24));
+    el.innerHTML=`<div class="alert-banner"><div class="alert-icon">⚠️</div><div class="alert-body"><div class="alert-title">提出期限が迫っています！</div><div class="alert-sub">${escHtml(p.title)} — ${diff<=0?'今日':diff===1?'明日':'あと'+diff+'日'}</div></div></div>`;
+  } else { el.innerHTML=''; }
+  const notifBadge=document.getElementById('notifBadge');
+  if (urgent.length) { notifBadge.style.display='inline-flex'; notifBadge.textContent=urgent.length; }
+  else notifBadge.style.display='none';
+}
+
+// ===== NOTIFICATIONS MODAL =====
+function openNotifModal() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const upcoming = db.prints.filter(p=>{
+    if (!p.deadline) return false;
+    const d=new Date(p.deadline); d.setHours(0,0,0,0);
+    return (d-today)/(1000*60*60*24)<=7;
+  }).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+  const list=document.getElementById('notifList');
+  if (!upcoming.length) {
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-text">期限が近いプリントはありません</div></div>';
+  } else {
+    list.innerHTML=upcoming.map(p=>{
+      const diff=Math.ceil((new Date(p.deadline)-today)/(1000*60*60*24));
+      const cls=diff<=1?'deadline-urgent':diff<=3?'deadline-soon':'deadline-ok';
+      return `<div class="print-card" style="margin-bottom:8px" onclick="closeModal('notifModal');openDetail('${p.id}')">
+        <div class="print-thumb">📄</div>
+        <div class="print-info">
+          <div class="print-title">${escHtml(p.title)}</div>
+          <div class="print-meta">期限: ${p.deadline.replace(/-/g,'/')}</div>
+        </div>
+        <div class="deadline-badge ${cls}">${diff<=0?'今日':diff===1?'明日':diff+'日後'}</div>
+      </div>`;
+    }).join('');
+  }
+  openModal('notifModal');
+}
+
+// ===== CAMERA =====
+function openCamera() {
+  capturedPhotos=[];
+  document.getElementById('camPreviewStrip').innerHTML='';
+  document.getElementById('camCountBadge').style.display='none';
+  document.getElementById('cameraView').style.display='flex';
+  startCamera();
+}
+async function startCamera() {
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:camFacing,width:{ideal:1920},height:{ideal:1080}},audio:false});
+    document.getElementById('cameraVideo').srcObject=camStream;
+  } catch(e) {
+    document.getElementById('cameraView').style.display='none';
+    showToast('カメラにアクセスできません。設定を確認してください。');
+  }
+}
+function closeCamera() {
+  if (camStream) { camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
+  document.getElementById('cameraView').style.display='none';
+  if (capturedPhotos.length) { openCameraResults(); }
+}
+function flipCamera() {
+  camFacing = camFacing==='environment'?'user':'environment';
+  if (camStream) { camStream.getTracks().forEach(t=>t.stop()); }
+  startCamera();
+}
+function shootPhoto() {
+  const video=document.getElementById('cameraVideo');
+  const canvas=document.getElementById('snapCanvas');
+  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+  const dataURL=canvas.toDataURL('image/jpeg',0.8);
+  capturedPhotos.push(dataURL);
+  // Animate
+  const badge=document.getElementById('camCountBadge');
+  badge.style.display='block'; badge.textContent=capturedPhotos.length+'枚';
+  const strip=document.getElementById('camPreviewStrip');
+  const img=document.createElement('img');
+  img.src=dataURL; img.className='cam-preview-thumb';
+  strip.appendChild(img);
+  // Flash
+  const flash=document.createElement('div');
+  flash.style.cssText='position:fixed;inset:0;background:#fff;z-index:400;opacity:0.7;pointer-events:none;animation:flashAnim 0.2s ease';
+  document.body.appendChild(flash);
+  if (!document.getElementById('flashStyle')) {
+    const s=document.createElement('style');
+    s.id='flashStyle'; s.textContent='@keyframes flashAnim{0%{opacity:0.7}100%{opacity:0}}';
+    document.head.appendChild(s);
+  }
+  setTimeout(()=>flash.remove(),200);
+  if (capturedPhotos.length>=10) closeCamera();
+}
+function openCameraResults() {
+  // Auto-open add modal with first photo
+  editingPrintId=null;
+  document.getElementById('addModalTitle').textContent='プリントを追加（'+capturedPhotos.length+'枚）';
+  document.getElementById('printTitle').value='';
+  document.getElementById('printMemo').value='';
+  document.getElementById('printDeadline').value='';
+  document.querySelectorAll('.tag-option').forEach(t=>t.className='tag-option');
+  updateFolderSelect();
+  openModal('addModal');
+  // Store photos for saving
+  window._pendingPhotos = capturedPhotos;
+}
+function handleFileInput(e) {
+  const files=Array.from(e.target.files);
+  if (!files.length) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    capturedPhotos=[ev.target.result];
+    window._pendingPhotos=capturedPhotos;
+    editingPrintId=null;
+    document.getElementById('addModalTitle').textContent='プリントを追加';
+    document.getElementById('printTitle').value=files[0].name.replace(/\.[^.]+$/,'');
+    document.getElementById('printMemo').value='';
+    document.getElementById('printDeadline').value='';
+    document.querySelectorAll('.tag-option').forEach(t=>t.className='tag-option');
+    updateFolderSelect();
+    openModal('addModal');
+  };
+  reader.readAsDataURL(files[0]);
+  e.target.value='';
+}
+
+// Override savePrint to include image
+const origSavePrint = savePrint;
+function savePrint() {
+  const title = document.getElementById('printTitle').value.trim();
+  if (!title) { showToast('タイトルを入力してください'); return; }
+  const tags=[];
+  document.querySelectorAll('.tag-option').forEach(t=>{ if(t.className!=='tag-option') tags.push(t.dataset.tag); });
+  const data={
+    title,
+    folderId:document.getElementById('printFolder').value,
+    tags,
+    deadline:document.getElementById('printDeadline').value,
+    memo:document.getElementById('printMemo').value.trim(),
+    date:new Date().toISOString(),
+  };
+  if (window._pendingPhotos && window._pendingPhotos.length) {
+    data.imageData=window._pendingPhotos[0];
+    window._pendingPhotos=null;
+  }
+  if (editingPrintId) {
+    const idx=db.prints.findIndex(x=>x.id===editingPrintId);
+    if (idx>=0) db.prints[idx]={...db.prints[idx],...data};
+  } else {
+    data.id='p'+Date.now();
+    db.prints.unshift(data);
+  }
+  saveData(); closeModal('addModal');
+  renderFolders(); renderPrints(); renderCalendar(); checkUrgent();
+  showToast(editingPrintId?'✅ 更新しました':'✅ 保存しました');
+  editingPrintId=null;
+}
+
+// ===== RECENT SCANS =====
+function renderRecentScans() {
+  const recent = db.prints.filter(p=>p.imageData).slice(0,5);
+  const el=document.getElementById('recentScanList');
+  if (!recent.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📷</div><div class="empty-text">スキャン済みのプリントがありません</div></div>`; return; }
+  el.innerHTML=recent.map(p=>printCardHTML(p)).join('');
+}
+
+// ===== CALENDAR =====
+function renderCalendar() {
+  const year=calViewDate.getFullYear(), month=calViewDate.getMonth();
+  document.getElementById('calMonthLabel').textContent=`${year}年${month+1}月`;
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const deadlineDates={};
+  db.prints.forEach(p=>{
+    if (!p.deadline) return;
+    const d=new Date(p.deadline);
+    if (d.getFullYear()===year&&d.getMonth()===month) {
+      const key=d.getDate(); deadlineDates[key]=(deadlineDates[key]||[]);
+      deadlineDates[key].push(p);
+    }
+  });
+  const daysEl=document.getElementById('calDays');
+  let html='';
+  for (let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"></div>`;
+  for (let d=1;d<=daysInMonth;d++) {
+    const date=new Date(year,month,d); date.setHours(0,0,0,0);
+    const dow=date.getDay();
+    const isToday=date.getTime()===today.getTime();
+    const hasEvent=!!deadlineDates[d];
+    const cls=['cal-day',dow===0?'sun':'',dow===6?'sat':'',isToday?'today':'',hasEvent?'has-event':''].filter(Boolean).join(' ');
+    html+=`<div class="${cls}" onclick="calDayClick(${year},${month},${d})">${d}</div>`;
+  }
+  daysEl.innerHTML=html;
+  renderCalendarEvents(year,month);
+}
+function renderCalendarEvents(year,month) {
+  const events=db.prints.filter(p=>{
+    if (!p.deadline) return false;
+    const d=new Date(p.deadline);
+    return d.getFullYear()===year&&d.getMonth()===month;
+  }).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+  const today=new Date(); today.setHours(0,0,0,0);
+  const el=document.getElementById('calEventsList');
+  if (!events.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">この月の提出物はありません</div></div>`; return; }
+  el.innerHTML=events.map(p=>{
+    const d=new Date(p.deadline); d.setHours(0,0,0,0);
+    const diff=Math.ceil((d-today)/(1000*60*60*24));
+    const urgent=diff<=1;
+    const done=diff<0;
+    return `<div class="cal-event-card ${urgent?'urgent':''} ${done?'done':''}" onclick="openDetail('${p.id}')">
+      <div class="cal-event-name">${escHtml(p.title)}</div>
+      <div class="cal-event-date">📅 ${p.deadline.replace(/-/g,'/')} ${done?'（期限切れ）':diff===0?'（今日）':diff===1?'（明日）':''}</div>
+      ${(p.tags||[]).map(t=>`<div class="cal-event-tag">#${t}</div>`).join('')}
+    </div>`;
+  }).join('');
+}
+function calDayClick(y,m,d) {
+  const events=db.prints.filter(p=>{
+    if (!p.deadline) return false;
+    const dd=new Date(p.deadline);
+    return dd.getFullYear()===y&&dd.getMonth()===m&&dd.getDate()===d;
+  });
+  if (!events.length) {
+    if (confirm(`${y}/${m+1}/${d} に新しいプリントを追加しますか？`)) {
+      openAddModal();
+      setTimeout(()=>{
+        const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        document.getElementById('printDeadline').value=dateStr;
+      },100);
+    }
+  } else openDetail(events[0].id);
+}
+function changeMonth(dir) {
+  calViewDate.setMonth(calViewDate.getMonth()+dir);
+  renderCalendar();
+}
+
+// ===== CHECKLIST =====
+function renderChecklist() {
+  const el=document.getElementById('checklistWrap');
+  if (!db.checkItems.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">持ち物リストが空です</div><div class="empty-sub">＋ボタンから追加しましょう</div></div>`; return; }
+  const done=db.checkItems.filter(c=>c.checked).length;
+  el.innerHTML=`<div style="padding:8px 0 12px;font-size:13px;color:var(--text2);font-weight:500">${done}/${db.checkItems.length} チェック済み</div>`+
+    db.checkItems.map(c=>`
+    <div class="check-item" onclick="toggleCheck('${c.id}')">
+      <div class="check-box ${c.checked?'checked':''}"></div>
+      <div>
+        <div class="check-label ${c.checked?'done':''}">${escHtml(c.label)}</div>
+        ${c.subject?`<div class="check-subject">${escHtml(c.subject)}</div>`:''}
+      </div>
+      <button onclick="event.stopPropagation();deleteCheckItem('${c.id}')" style="margin-left:auto;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">×</button>
+    </div>`).join('')+
+    `<button class="btn-secondary" style="margin-top:8px" onclick="resetChecklist()">🔄 全てリセット</button>`;
+}
+function toggleCheck(id) {
+  const item=db.checkItems.find(c=>c.id===id);
+  if (item) { item.checked=!item.checked; saveData(); renderChecklist(); }
+}
+function deleteCheckItem(id) {
+  db.checkItems=db.checkItems.filter(c=>c.id!==id);
+  saveData(); renderChecklist();
+}
+function resetChecklist() {
+  db.checkItems.forEach(c=>c.checked=false);
+  saveData(); renderChecklist(); showToast('🔄 リセットしました');
+}
+function openCheckItemModal() {
+  document.getElementById('checkItemName').value='';
+  document.getElementById('checkItemSubject').value='';
+  openModal('checkItemModal');
+  setTimeout(()=>document.getElementById('checkItemName').focus(),300);
+}
+function saveCheckItem() {
+  const label=document.getElementById('checkItemName').value.trim();
+  if (!label) { showToast('アイテム名を入力してください'); return; }
+  db.checkItems.push({id:'c'+Date.now(),label,subject:document.getElementById('checkItemSubject').value.trim(),checked:false});
+  saveData(); closeModal('checkItemModal'); renderChecklist();
+  showToast('✅ 追加しました');
+}
+
+// ===== TIMETABLE =====
+const DAYS=['月','火','水','木','金'];
+const PERIODS=['1限','2限','3限','4限','5限','6限'];
+function renderTimetable() {
+  const table=document.getElementById('timetableEl');
+  let html=`<tr><th></th>${DAYS.map(d=>`<th>${d}</th>`).join('')}</tr>`;
+  for (let p=0;p<6;p++) {
+    html+=`<tr><td class="period">${PERIODS[p]}</td>`;
+    for (let d=0;d<5;d++) {
+      const subj=db.timetable[d]?db.timetable[d][p]||'':'';
+      html+=`<td class="${subj?'filled':''}" onclick="openTimetableEdit(${d},${p})">${escHtml(subj)}</td>`;
+    }
+    html+=`</tr>`;
+  }
+  table.innerHTML=html;
+}
+function editTimetable() { showToast('セルをタップして編集できます'); }
+function openTimetableEdit(day,period) {
+  document.getElementById('ttDay').value=day;
+  document.getElementById('ttPeriod').value=period;
+  document.getElementById('ttSubject').value=db.timetable[day]?db.timetable[day][period]||'':'';
+  openModal('timetableModal');
+  setTimeout(()=>document.getElementById('ttSubject').focus(),300);
+}
+function saveTimetableCell() {
+  const d=+document.getElementById('ttDay').value;
+  const p=+document.getElementById('ttPeriod').value;
+  const subj=document.getElementById('ttSubject').value.trim();
+  if (!db.timetable[d]) db.timetable[d]=[];
+  db.timetable[d][p]=subj;
+  saveData(); closeModal('timetableModal'); renderTimetable(); renderTodayPrints();
+  showToast('✅ 時間割を更新しました');
+}
+function renderTodayPrints() {
+  const todayDow=new Date().getDay();
+  const dayIdx=todayDow-1;
+  const el=document.getElementById('todayPrints');
+  if (dayIdx<0||dayIdx>4) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">🎉</div><div class="empty-text">今日は休みです</div></div>`; return; }
+  const subjects=(db.timetable[dayIdx]||[]).filter(Boolean);
+  const folderIds=db.folders.filter(f=>subjects.includes(f.name)).map(f=>f.id);
+  const prints=db.prints.filter(p=>folderIds.includes(p.folderId)).slice(0,5);
+  if (!prints.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">今日の授業のプリントがありません</div></div>`; return; }
+  el.innerHTML=prints.map(p=>printCardHTML(p)).join('');
+}
+
+// ===== SETTINGS =====
+function toggleSetting(key) {
+  db.settings[key]=!db.settings[key];
+  const el=document.getElementById('toggle-'+key);
+  if (el) {
+    el.className=`toggle ${db.settings[key]?'on':'off'}`;
+  }
+  saveData();
+  showToast(db.settings[key]?'✅ 有効にしました':'オフにしました');
+}
+
+// ===== EXPORT / IMPORT =====
+function exportData() {
+  const json=JSON.stringify(db,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`printkanri_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📤 エクスポートしました');
+}
+function importData(e) {
+  const file=e.target.files[0];
+  if (!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try {
+      const loaded=JSON.parse(ev.target.result);
+      if (!confirm('データをインポートしますか？現在のデータは上書きされます。')) return;
+      if (loaded.prints) db.prints=loaded.prints;
+      if (loaded.folders) db.folders=loaded.folders;
+      if (loaded.checkItems) db.checkItems=loaded.checkItems;
+      if (loaded.timetable) db.timetable=loaded.timetable;
+      if (loaded.settings) db.settings={...db.settings,...loaded.settings};
+      saveData();
+      renderFolders(); renderPrints(); renderCalendar(); renderChecklist(); renderTimetable(); checkUrgent();
+      showToast('✅ インポート完了');
+    } catch(err) { showToast('⚠️ ファイルが正しくありません'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+function clearAllData() {
+  if (!confirm('全データを削除しますか？この操作は元に戻せません。')) return;
+  db.prints=[]; db.folders=[{id:'f1',name:'数学',icon:'📐'},{id:'f2',name:'理科',icon:'🧬'},{id:'f3',name:'国語',icon:'📖'},{id:'f4',name:'社会',icon:'🌍'}];
+  db.checkItems=[]; db.timetable=Array(5).fill(null).map(()=>Array(6).fill(''));
+  saveData();
+  renderFolders(); renderPrints(); renderCalendar(); renderChecklist(); renderTimetable(); checkUrgent();
+  showToast('🗑 全データを削除しました');
+}
+function exportPDF() { showToast('PDF書き出し機能（開発中）'); }
+function exportSinglePDF(id) { showToast('PDF書き出し機能（開発中）'); }
+function shareApp() {
+  if (navigator.share) { navigator.share({title:'プリント管理アプリ',url:location.href}); }
+  else { navigator.clipboard?.writeText(location.href); showToast('URLをコピーしました'); }
+}
+
+// ===== UTILS =====
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.remove('show');
+  void t.offsetWidth; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ===== START =====
+init();
+</script>
+</body>
+</html>
