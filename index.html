@@ -1372,39 +1372,7 @@ function renderCalendarEvents(year,month) {
       const d = new Date(e.date);
       return d.getFullYear() === year && d.getMonth() === month;
     }).map(e => ({ title: e.title, deadline: e.date, isSchoolEvent: true }));
-    events = [...events, ...sEvents];
-  }
-
-  // ② 日付順に並べ替える
-  events.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-
-  const el = document.getElementById('calEventsList');
-  if (!events.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-text">予定はありません</div></div>';
-    return;
-  }
-
-  // ③ HTMLを作るときに、行事なら「🏫」を付ける
-  el.innerHTML = events.map(p => {
-    const d = new Date(p.deadline);
-    const dateStr = `${d.getDate()}日(${['日','月','火','水','木','金','土'][d.getDay()]})`;
-    return `
-      <div class="cal-event-card ${p.isSchoolEvent ? 'school-event' : ''}" 
-           ${p.isPrint ? `onclick="openDetail('${p.id}')"` : ''}
-           style="${p.isSchoolEvent ? 'border-left:4px solid #4a90e2; background:#f0f7ff;' : ''}">
-        <div class="event-date">${dateStr}</div>
-        <div class="event-content">
-          <div class="event-title">${p.isSchoolEvent ? '🏫 ' : ''}${p.title}</div>
-        </div>
-      </div>`;
-  }).join('');
-}
- 
-function changeMonth(dir) {
-  calViewDate.setMonth(calViewDate.getMonth()+dir);
-  renderCalendar();
-}
-  // 日付順に並び替える
+   // ② 日付順に並び替える
   events.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
 
   const el = document.getElementById('calEventsList');
@@ -1428,6 +1396,11 @@ function changeMonth(dir) {
   }).join('');
 }
 
+function changeMonth(dir) {
+  calViewDate.setMonth(calViewDate.getMonth() + dir);
+  renderCalendar();
+}
+
 function calDayClick(y, m, d) {
   const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   const print = db.prints.find(p => p.deadline === dateStr);
@@ -1447,8 +1420,6 @@ function calDayClick(y, m, d) {
     }
   }
 }
-
-// ===== CHECKLIST =====
 function renderChecklist() {
   const el=document.getElementById('checklistWrap');
   if (!db.checkItems.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">持ち物リストが空です</div><div class="empty-sub">＋ボタンから追加しましょう</div></div>`; return; }
