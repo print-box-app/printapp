@@ -169,9 +169,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;font-weight:700;color:var(--text3);padding:0 12px 4px}
 .cal-weekdays span:first-child{color:#e57373}
 .cal-weekdays span:last-child{color:#42a5f5}
-.cal-days{display:grid;grid-template-columns:repeat(7,1fr);padding:0 12px;gap:2px}
-
-/* カレンダー日付セル — テキストラベル版 */
 .cal-days{display:grid;grid-template-columns:repeat(7,1fr);padding:0 4px;gap:2px}
 .cal-day{min-height:64px;display:flex;flex-direction:column;align-items:center;padding:4px 2px 4px;font-size:13px;border-radius:6px;cursor:pointer;position:relative;color:var(--text);gap:2px;border:1px solid transparent}
 .cal-day:active{background:var(--blue-lighter)}
@@ -181,8 +178,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .cal-day.other-month{opacity:0.3}
 .cal-day.today .cal-day-num{background:var(--blue);color:#fff!important;font-weight:700}
 .cal-day.has-events{background:#fafbff}
-
-/* テキストラベル */
 .cal-labels{display:flex;flex-direction:column;gap:1px;width:100%}
 .cal-label{font-size:9px;font-weight:700;padding:1px 3px;border-radius:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;text-align:center}
 .cal-label-event{background:var(--blue-light);color:var(--blue)}
@@ -191,7 +186,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .cal-label-deadline{background:var(--amber-light);color:var(--amber)}
 .cal-label-more{background:var(--gray-light);color:var(--gray);text-align:center}
 
-/* 締め切り警告バナー */
 .upcoming-banner{margin:0 16px 12px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--gray2)}
 .upcoming-banner-title{background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:7px 12px;letter-spacing:0.3px}
 .upcoming-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fff;border-top:1px solid var(--gray2);cursor:pointer}
@@ -204,7 +198,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .upcoming-badge-soon{background:var(--amber-light);color:var(--amber)}
 .upcoming-badge-week{background:var(--blue-light);color:var(--blue)}
 
-/* カレンダーフィルタータブ */
 .cal-filter-tabs{display:flex;gap:6px;padding:12px 16px 4px;overflow-x:auto;scrollbar-width:none}
 .cal-filter-tabs::-webkit-scrollbar{display:none}
 .cal-filter-tab{font-size:11px;padding:5px 12px;border-radius:20px;cursor:pointer;font-weight:700;border:1.5px solid var(--gray2);background:#fff;font-family:inherit;white-space:nowrap;transition:all 0.15s;flex-shrink:0}
@@ -213,10 +206,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .cal-filter-tab.active-exam{background:var(--red-light);color:var(--red);border-color:var(--red)}
 .cal-filter-tab.active-cert{background:var(--purple-light);color:var(--purple);border-color:var(--purple)}
 .cal-filter-tab.active-deadline{background:var(--amber-light);color:var(--amber);border-color:var(--amber)}
-
 .cal-events-section{padding:0 16px 80px}
 
-/* 改善されたイベントカード */
 .cal-event-card{background:#fff;border-radius:var(--radius-sm);border-left:3px solid var(--blue);border-top:1px solid var(--gray2);border-right:1px solid var(--gray2);border-bottom:1px solid var(--gray2);padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;align-items:flex-start;gap:10px}
 .cal-event-card.type-exam{border-left-color:var(--red)}
 .cal-event-card.type-cert{border-left-color:var(--purple)}
@@ -232,7 +223,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .badge-cert{background:var(--purple-light);color:var(--purple)}
 .badge-deadline{background:var(--amber-light);color:var(--amber)}
 
-/* 日付クリックポップアップ */
 .day-popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:none;align-items:flex-end;justify-content:center}
 .day-popup-overlay.open{display:flex}
 .day-popup{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px;max-height:70vh;overflow-y:auto;animation:slideUp 0.25s ease}
@@ -329,7 +319,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 
 #fileInput{display:none}
 
-/* 凡例 */
 .cal-legend{display:flex;gap:12px;padding:8px 16px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);font-weight:500}
 .legend-dot{width:8px;height:8px;border-radius:50%}
@@ -443,9 +432,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
     <div class="cal-month-label" id="calMonthLabel"></div>
     <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
   </div>
-  <!-- 締め切り警告 -->
   <div id="upcomingBanner"></div>
-  <!-- 凡例 -->
   <div class="cal-legend">
     <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>学校行事</div>
     <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>試験</div>
@@ -457,7 +444,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   </div>
   <div class="cal-days" id="calDays"></div>
   <div style="height:12px"></div>
-  <!-- フィルタータブ -->
   <div class="cal-filter-tabs" id="calFilterTabs">
     <button class="cal-filter-tab active-all" onclick="setCalFilter('all',this)">すべて</button>
     <button class="cal-filter-tab" onclick="setCalFilter('event',this)">🏫 学校行事</button>
@@ -601,7 +587,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 </div>
 
 <!-- ===== MODALS ===== -->
-<!-- Add/Edit Print Modal -->
 <div class="modal-overlay" id="addModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -637,7 +622,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- Folder Modal -->
 <div class="modal-overlay" id="folderModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -666,7 +650,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- Sort Menu Modal -->
 <div class="modal-overlay" id="sortModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -682,7 +665,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- CheckItem Modal -->
 <div class="modal-overlay" id="checkItemModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -700,7 +682,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- Notif Modal -->
 <div class="modal-overlay" id="notifModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -710,7 +691,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- Timetable Edit Modal -->
 <div class="modal-overlay" id="timetableModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -740,7 +720,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- Day Popup -->
 <div class="day-popup-overlay" id="dayPopupOverlay" onclick="closeDayPopup(event)">
   <div class="day-popup">
     <div class="modal-handle"></div>
@@ -755,7 +734,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 <script>
 // ===== 学校年間予定 =====
 const schoolEvents = [
- // 4月
+  // 4月
   { date: "2026-04-03", title: "始業式・学力診断テスト(国)", type: "exam" },
   { date: "2026-04-06", title: "学力診断テスト(英・数)", type: "exam" },
   { date: "2026-04-07", title: "入学式・新入生歓迎会・クラブ紹介", type: "event" },
@@ -772,19 +751,19 @@ const schoolEvents = [
   { date: "2026-04-24", title: "遠足", type: "event" },
   { date: "2026-04-28", title: "尿検査", type: "event" },
   { date: "2026-04-30", title: "尿検査・実習1-4", type: "event" },
-// 5月
-  { date: "2026-05-01", title: "尿検査", type: "event" }, 
+  // 5月
+  { date: "2026-05-01", title: "尿検査", type: "event" },
   { date: "2026-05-07", title: "レポート提出・実習2-1・生徒総会", type: "event" },
-  { date: "2026-05-08", title: "眼科検診", type: "event" }, 
-  { date: "2026-05-12", title: "歯科検診", type: "event" }, 
+  { date: "2026-05-08", title: "眼科検診", type: "event" },
+  { date: "2026-05-12", title: "歯科検診", type: "event" },
   { date: "2026-05-14", title: "実習2-2", type: "event" },
-  { date: "2026-05-16", title: "東信総体", type: "event" }, 
-  { date: "2026-05-17", title: "東信総体", type: "event" }, 
-  { date: "2026-05-20", title: "1学期中間考査", type: "exam" }, 
-  { date: "2026-05-21", title: "1学期中間考査", type: "exam" }, 
+  { date: "2026-05-16", title: "東信総体", type: "event" },
+  { date: "2026-05-17", title: "東信総体", type: "event" },
+  { date: "2026-05-20", title: "1学期中間考査", type: "exam" },
+  { date: "2026-05-21", title: "1学期中間考査", type: "exam" },
   { date: "2026-05-22", title: "1学期中間考査・3年就職ガイダンス", type: "exam" },
-  { date: "2026-05-23", title: "PTA総会(水456)", type: "event" }, 
-  { date: "2026-05-28", title: "実習2-3", type: "event" }, 
+  { date: "2026-05-23", title: "PTA総会(水456)", type: "event" },
+  { date: "2026-05-28", title: "実習2-3", type: "event" },
   { date: "2026-05-29", title: "第1回英語検定", type: "cert" },
   // 6月
   { date: "2026-06-01", title: "成績会議(水1234)", type: "event" },
@@ -843,7 +822,7 @@ const schoolEvents = [
   { date: "2026-09-28", title: "2学期中間考査", type: "exam" },
   { date: "2026-09-29", title: "2学期中間考査", type: "exam" },
   { date: "2026-09-30", title: "2学期中間考査", type: "exam" },
-// 10月
+  // 10月
   { date: "2026-10-01", title: "創立記念日(生徒休業日)", type: "event" },
   { date: "2026-10-04", title: "第1回第一種電気工事士筆記試験(下期)", type: "cert" },
   { date: "2026-10-08", title: "実習→平和学習", type: "event" },
@@ -858,7 +837,7 @@ const schoolEvents = [
   { date: "2026-10-23", title: "公開授業", type: "event" },
   { date: "2026-10-24", title: "実習3-2", type: "event" },
   { date: "2026-10-29", title: "芸術鑑賞(午前)", type: "event" },
-// 11月
+  // 11月
   { date: "2026-11-01", title: "第2回英語検定(2次)", type: "cert" },
   { date: "2026-11-03", title: "文化の日", type: "event" },
   { date: "2026-11-05", title: "実習5-3", type: "event" },
@@ -903,7 +882,7 @@ const schoolEvents = [
   { date: "2027-01-27", title: "3年テスト返却・校内発表会", type: "event" },
   { date: "2027-01-28", title: "活動発表会", type: "event" },
   { date: "2027-01-31", title: "全商情報処理検定・第3回英語検定", type: "cert" },
-// 2027年 2月
+  // 2027年 2月
   { date: "2027-02-02", title: "前期選抜受付開始", type: "event" },
   { date: "2027-02-03", title: "予餞会・志望変更受付", type: "event" },
   { date: "2027-02-04", title: "前期選抜(入試)・家庭学習", type: "event" },
@@ -920,7 +899,7 @@ const schoolEvents = [
   { date: "2027-02-23", title: "天皇誕生日", type: "event" },
   { date: "2027-02-24", title: "後期選抜受付開始", type: "event" },
   { date: "2027-02-28", title: "日商簿記検定", type: "cert" },
-// 2027年 3月
+  // 2027年 3月
   { date: "2027-03-01", title: "卒業式", type: "event" },
   { date: "2027-03-02", title: "特編授業・後期選抜準備", type: "event" },
   { date: "2027-03-03", title: "後期選抜(入試)", type: "event" },
@@ -936,6 +915,7 @@ const schoolEvents = [
   { date: "2027-03-22", title: "振替休日", type: "event" },
   { date: "2027-03-23", title: "終業式・離任式", type: "event" },
   { date: "2027-03-25", title: "新1年生入学予定者説明会", type: "event" },
+]; // ← ここが抜けていたのが原因
 
 // ===== DATA STORE =====
 let db = {
@@ -1301,7 +1281,6 @@ function sharePrint() {
 
 // ===== SORT =====
 function openSortMenu() {
-  // 現在のモードに合ったオプションをactiveに
   document.querySelectorAll('.sort-option').forEach(o=>{
     o.classList.toggle('active', o.dataset.mode === db.sortMode);
   });
@@ -1454,26 +1433,21 @@ function renderRecentScans() {
 }
 
 // ===== CALENDAR =====
-// typeごとの設定
 const TYPE_CONFIG = {
-  event:    { icon:'🏫', dotClass:'cal-dot-event',    badgeClass:'badge-event',    label:'学校行事' },
-  exam:     { icon:'📝', dotClass:'cal-dot-exam',     badgeClass:'badge-exam',     label:'試験' },
-  cert:     { icon:'🎓', dotClass:'cal-dot-cert',     badgeClass:'badge-cert',     label:'検定' },
-  deadline: { icon:'📤', dotClass:'cal-dot-deadline', badgeClass:'badge-deadline', label:'提出期限' },
+  event:    { icon:'🏫', badgeClass:'badge-event',    label:'学校行事' },
+  exam:     { icon:'📝', badgeClass:'badge-exam',     label:'試験' },
+  cert:     { icon:'🎓', badgeClass:'badge-cert',     label:'検定' },
+  deadline: { icon:'📤', badgeClass:'badge-deadline', label:'提出期限' },
 };
 
 function setCalFilter(f, el) {
   calFilter = f;
-  // タブのactive更新
-  document.querySelectorAll('.cal-filter-tab').forEach(t => {
-    t.className = 'cal-filter-tab';
-  });
+  document.querySelectorAll('.cal-filter-tab').forEach(t => { t.className = 'cal-filter-tab'; });
   el.className = `cal-filter-tab active-${f}`;
   renderCalendarEvents(calViewDate.getFullYear(), calViewDate.getMonth());
 }
 
 function getEventsForMonth(year, month) {
-  // 学校行事
   const school = schoolEvents
     .filter(ev => {
       const d = new Date(ev.date);
@@ -1481,7 +1455,6 @@ function getEventsForMonth(year, month) {
     })
     .map(ev => ({ ...ev, source: 'school' }));
 
-  // 自分のプリント提出期限
   const deadlines = db.prints
     .filter(p => {
       if (!p.deadline) return false;
@@ -1501,7 +1474,6 @@ function getEventsForMonth(year, month) {
 
 function renderUpcomingBanner() {
   const today = new Date(); today.setHours(0,0,0,0);
-  // プリント締め切り（14日以内）
   const deadlines = db.prints
     .filter(p => {
       if (!p.deadline) return false;
@@ -1511,7 +1483,6 @@ function renderUpcomingBanner() {
     })
     .sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
 
-  // 学校行事（試験・検定のみ、14日以内）
   const schoolUpcoming = schoolEvents
     .filter(ev => {
       const d = new Date(ev.date); d.setHours(0,0,0,0);
@@ -1562,8 +1533,6 @@ function renderCalendar() {
   const today = new Date(); today.setHours(0,0,0,0);
 
   const allEvents = getEventsForMonth(year, month);
-
-  // 日付ごとのイベントマップ
   const dayEventMap = {};
   allEvents.forEach(ev => {
     const d = new Date(ev.date).getDate();
@@ -1581,13 +1550,11 @@ function renderCalendar() {
     const isToday = date.getTime() === today.getTime();
     const evs = dayEventMap[d] || [];
 
-    // テキストラベル生成（最大2件 + 残り件数）
     const labelColorMap = { event:'cal-label-event', exam:'cal-label-exam', cert:'cal-label-cert', deadline:'cal-label-deadline' };
     const showEvs = evs.slice(0, 2);
     const remaining = evs.length - showEvs.length;
     const labelsHtml = showEvs.map(ev => {
       const cls = labelColorMap[ev.type] || 'cal-label-event';
-      // ラベルテキストを短縮
       let txt = ev.title;
       if (txt.length > 5) txt = txt.slice(0, 4) + '…';
       return `<div class="cal-label ${cls}">${txt}</div>`;
@@ -1607,12 +1574,7 @@ function renderCalendar() {
 function renderCalendarEvents(year, month) {
   const today = new Date(); today.setHours(0,0,0,0);
   let events = getEventsForMonth(year, month);
-
-  // フィルター適用
-  if (calFilter !== 'all') {
-    events = events.filter(ev => ev.type === calFilter);
-  }
-
+  if (calFilter !== 'all') events = events.filter(ev => ev.type === calFilter);
   events.sort((a,b) => new Date(a.date) - new Date(b.date));
 
   const el = document.getElementById('calEventsList');
@@ -1628,7 +1590,6 @@ function renderCalendarEvents(year, month) {
     const done = diff < 0;
     const dateStr = ev.date.replace(/-/g,'/');
     const dayLabel = done ? '終了' : diff===0 ? '今日' : diff===1 ? '明日' : `${diff}日後`;
-
     const clickAttr = ev.printId ? `onclick="openDetail('${ev.printId}')"` : '';
     return `<div class="cal-event-card type-${ev.type} ${done?'done':''}" ${clickAttr} style="${ev.printId?'cursor:pointer':'cursor:default'}">
       <div class="cal-event-icon">${cfg.icon}</div>
@@ -1648,10 +1609,7 @@ function showDayPopup(y, m, d) {
   document.getElementById('dayPopupTitle').textContent = dateStr;
 
   const isoDate = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-
-  // その日の学校行事
   const school = schoolEvents.filter(ev => ev.date === isoDate);
-  // その日のプリント締め切り
   const deadlines = db.prints.filter(p => p.deadline === isoDate);
 
   const allEvs = [
@@ -1660,12 +1618,9 @@ function showDayPopup(y, m, d) {
   ];
 
   if (!allEvs.length) {
-    // 予定なし → 追加ダイアログ
     if (confirm(`${y}/${m+1}/${d} に新しいプリントを追加しますか？`)) {
       openAddModal();
-      setTimeout(()=>{
-        document.getElementById('printDeadline').value = isoDate;
-      },100);
+      setTimeout(()=>{ document.getElementById('printDeadline').value = isoDate; },100);
     }
     return;
   }
@@ -1696,7 +1651,6 @@ function closeDayPopupDirect() {
   document.getElementById('dayPopupOverlay').classList.remove('open');
   document.body.style.overflow = '';
 }
-
 function changeMonth(dir) {
   calViewDate.setMonth(calViewDate.getMonth()+dir);
   renderCalendar();
