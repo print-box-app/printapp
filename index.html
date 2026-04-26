@@ -1361,45 +1361,91 @@ function renderCalendar() {
   renderCalendarEvents(year,month);
 }
 function renderCalendarEvents(year,month) {
-  const events=db.prints.filter(p=>{
+  let events = db.prints.filter(p => {
     if (!p.deadline) return false;
-    const d=new Date(p.deadline);
-    return d.getFullYear()===year&&d.getMonth()===month;
-  }).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
-  const today=new Date(); today.setHours(0,0,0,0);
-  const el=document.getElementById('calEventsList');
-  if (!events.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">この月の提出物はありません</div></div>`; return; }
-  el.innerHTML=events.map(p=>{
-    const d=new Date(p.deadline); d.setHours(0,0,0,0);
-    const diff=Math.ceil((d-today)/(1000*60*60*24));
-    const urgent=diff<=1;
-    const done=diff<0;
-    return `<div class="cal-event-card ${urgent?'urgent':''} ${done?'done':''}" onclick="openDetail('${p.id}')">
-      <div class="cal-event-name">${escHtml(p.title)}</div>
-      <div class="cal-event-date">📅 ${p.deadline.replace(/-/g,'/')} ${done?'（期限切れ）':diff===0?'（今日）':diff===1?'（明日）':''}</div>
-      ${(p.tags||[]).map(t=>`<div class="cal-event-tag">#${t}</div>`).join('')}
-    </div>`;
+    const d = new Date(p.deadline);
+    return d.getFullYear() === year && d.getMonth() === month;
+  }).map(p => ({ ...p, isPrint: true }));
+
+  if (db.settings.chikuma_sync) {
+    const sEvents = schoolEvents.filter(e => {
+      const d = new Date(e.date);
+      return d.getFullYear() === year && d.getMonth() === month;
+    }).map(e => ({ title: e.title, deadline: e.date, isSchoolEvent: true }));
+    events = [...events, ...sEvents];
+  }
+
+  // ② 日付順に並べ替える
+  events.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+  const el = document.getElementById('calEventsList');
+  if (!events.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-text">予定はありません</div></div>';
+    return;
+  }
+
+  // ③ HTMLを作るときに、行事なら「🏫」を付ける
+  el.innerHTML = events.map(p => {
+    const d = new Date(p.deadline);
+    const dateStr = `${d.getDate()}日(${['日','月','火','水','木','金','土'][d.getDay()]})`;
+    return `
+      <div class="cal-event-card ${p.isSchoolEvent ? 'school-event' : ''}" 
+           ${p.isPrint ? `onclick="openDetail('${p.id}')"` : ''}
+           style="${p.isSchoolEvent ? 'border-left:4px solid #4a90e2; background:#f0f7ff;' : ''}">
+        <div class="event-date">${dateStr}</div>
+        <div class="event-content">
+          <div class="event-title">${p.isSchoolEvent ? '🏫 ' : ''}${p.title}</div>
+        </div>
+      </div>`;
   }).join('');
 }
-function calDayClick(y,m,d) {
-  const events=db.prints.filter(p=>{
-    if (!p.deadline) return false;
-    const dd=new Date(p.deadline);
-    return dd.getFullYear()===y&&dd.getMonth()===m&&dd.getDate()===d;
-  });
-  if (!events.length) {
-    if (confirm(`${y}/${m+1}/${d} に新しいプリントを追加しますか？`)) {
-      openAddModal();
-      setTimeout(()=>{
-        const dateStr=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        document.getElementById('printDeadline').value=dateStr;
-      },100);
-    }
-  } else openDetail(events[0].id);
-}
+ 
 function changeMonth(dir) {
   calViewDate.setMonth(calViewDate.getMonth()+dir);
   renderCalendar();
+}
+  // 日付順に並び替える
+  events.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+  const el = document.getElementById('calEventsList');
+  if (!events.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-text">予定はありません</div></div>';
+    return;
+  }
+
+  el.innerHTML = events.map(p => {
+    const d = new Date(p.deadline);
+    const dateStr = `${d.getDate()}日(${['日','月','火','水','木','金','土'][d.getDay()]})`;
+    return `
+      <div class="cal-event-card ${p.isSchoolEvent ? 'school-event' : ''}" 
+           ${p.isPrint ? `onclick="openDetail('${p.id}')"` : ''}
+           style="${p.isSchoolEvent ? 'border-left:4px solid #4a90e2; background:#f0f7ff; margin-bottom:8px; padding:10px; border-radius:8px;' : 'margin-bottom:8px; padding:10px; border-radius:8px; border-left:4px solid #e2e2e2;'}">
+        <div class="event-date" style="font-size:0.8em; color:#666;">${dateStr}</div>
+        <div class="event-content">
+          <div class="event-title" style="${p.isSchoolEvent ? 'font-weight:bold; color:#2c3e50;' : ''}">${p.isSchoolEvent ? '🏫 ' : ''}${p.title}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function calDayClick(y, m, d) {
+  const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  const print = db.prints.find(p => p.deadline === dateStr);
+  const schoolEv = schoolEvents.find(e => e.date === dateStr);
+
+  if (print) {
+    openDetail(print.id);
+  } else if (schoolEv) {
+    if(typeof showToast === 'function') showToast(`🏫 ${schoolEv.title}`);
+  } else {
+    if (confirm(`${m + 1}月${d}日に新しいプリントを追加しますか？`)) {
+      openAddModal();
+      setTimeout(() => {
+        const input = document.getElementById('printDeadline');
+        if(input) input.value = dateStr;
+      }, 100);
+    }
+  }
 }
 
 // ===== CHECKLIST =====
