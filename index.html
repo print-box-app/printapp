@@ -670,6 +670,98 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 <input type="file" id="fileInput" accept="image/*" multiple onchange="handleFileInput(event)">
 
 <script>
+  const schoolEvents = [
+  // 4月
+  { date: "2026-04-06", title: "始業式・学力診断テスト", type: "event" },
+  { date: "2026-04-07", title: "入学式", type: "event" },
+  { date: "2026-04-08", title: "新入生歓迎会・クラブ紹介", type: "event" },
+  { date: "2026-04-13", title: "一斉クラブ会", type: "event" },
+  { date: "2026-04-15", title: "一斉委員会", type: "event" },
+  { date: "2026-04-21", title: "内科検診", type: "event" },
+  { date: "2026-04-22", title: "身体測定", type: "event" },
+  { date: "2026-04-23", title: "進学相談会", type: "event" },
+
+  // 5月
+  { date: "2026-05-08", title: "生徒総会", type: "event" },
+  { date: "2026-05-18", title: "教育実習開始", type: "event" }, // 6/5まで
+  { date: "2026-05-20", title: "中間考査", type: "exam" },
+  { date: "2026-05-21", title: "中間考査・1年交通安全教室", type: "exam" },
+  { date: "2026-05-22", title: "中間考査・3年進路ガイダンス", type: "exam" },
+  { date: "2026-05-23", title: "PTA総会", type: "event" },
+  { date: "2026-05-30", title: "第1回英語検定", type: "cert" },
+
+  // 6月
+  { date: "2026-06-07", title: "第1回危険物取扱者試験", type: "cert" },
+  { date: "2026-06-12", title: "機械製図検定(1次)", type: "cert" },
+  { date: "2026-06-19", title: "第94回計算技術検定", type: "cert" },
+  { date: "2026-06-21", title: "第2種電気工事士筆記試験(上期)", type: "cert" },
+  { date: "2026-07-30", title: "期末考査", type: "exam" },
+
+  // 7月
+  { date: "2026-07-01", title: "期末考査", type: "exam" },
+  { date: "2026-07-02", title: "期末考査", type: "exam" },
+  { date: "2026-07-03", title: "期末考査", type: "exam" },
+  { date: "2026-07-04", title: "千曲祭・第1種電気工事士技能(上期)", type: "event" },
+  { date: "2026-07-05", title: "千曲祭・全商ビジネス文書実務検定", type: "event" },
+  { date: "2026-07-06", title: "千曲祭(片付け)", type: "event" },
+  { date: "2026-07-07", title: "振替休日", type: "event" },
+  { date: "2026-07-13", title: "クラスマッチ", type: "event" },
+  { date: "2026-07-14", title: "クラスマッチ", type: "event" },
+  { date: "2026-07-27", title: "終業式", type: "event" },
+
+  // 8月
+  { date: "2026-08-20", title: "始業式", type: "event" },
+  { date: "2026-08-21", title: "実力テスト", type: "exam" },
+
+  // 9月
+  { date: "2026-09-03", title: "進学相談会", type: "event" },
+  { date: "2026-09-16", title: "就職試験解禁", type: "event" },
+  { date: "2026-09-30", title: "中間考査", type: "exam" },
+
+  // 10月
+  { date: "2026-10-01", title: "中間考査", type: "exam" },
+  { date: "2026-10-02", title: "中間考査", type: "exam" },
+  { date: "2026-10-04", title: "第1種電気工事士筆記(下期)", type: "cert" },
+  { date: "2026-10-14", title: "修学旅行(2年)", type: "event" },
+  { date: "2026-10-15", title: "修学旅行(2年)", type: "event" },
+  { date: "2026-10-16", title: "修学旅行(2年)", type: "event" },
+  { date: "2026-10-17", title: "修学旅行(2年)", type: "event" },
+  { date: "2026-10-25", title: "第2種電気工事士筆記(下期)", type: "cert" },
+
+  // 11月
+  { date: "2026-11-06", title: "生徒会選挙", type: "event" },
+  { date: "2026-11-20", title: "計算技術検定", type: "cert" },
+  { date: "2026-11-22", title: "第3回英語検定", type: "cert" },
+
+  // 12月
+  { date: "2026-12-02", title: "期末考査", type: "exam" },
+  { date: "2026-12-03", title: "期末考査", type: "exam" },
+  { date: "2026-12-04", title: "期末考査", type: "exam" },
+  { date: "2026-12-07", title: "期末考査", type: "exam" },
+  { date: "2026-12-12", title: "第1種電気工事士技能(下期)", type: "cert" },
+  { date: "2026-12-13", title: "第2種電気工事士技能(下期)", type: "cert" },
+  { date: "2026-12-25", title: "終業式", type: "event" },
+
+  // 1月
+  { date: "2027-01-07", title: "始業式", type: "event" },
+  { date: "2027-01-25", title: "全商簿記実務検定", type: "cert" },
+  { date: "2027-01-27", title: "課題研究発表会(生活福祉)", type: "event" },
+
+  // 2月
+  { date: "2027-02-04", title: "前期選抜(入試休み)", type: "event" },
+  { date: "2027-02-12", title: "課題研究発表会(建築・電気)", type: "event" },
+  { date: "2027-02-17", title: "前期合格発表", type: "event" },
+  { date: "2027-02-24", title: "学年末考査", type: "exam" },
+  { date: "2027-02-25", title: "学年末考査", type: "exam" },
+  { date: "2027-02-26", title: "学年末考査", type: "exam" },
+
+  // 3月
+  { date: "2027-03-01", title: "学年末考査", type: "exam" },
+  { date: "2027-03-03", title: "卒業式", type: "event" },
+  { date: "2027-03-09", title: "後期選抜", type: "event" },
+  { date: "2027-03-18", title: "後期合格発表", type: "event" },
+  { date: "2027-03-23", title: "終業式・離任式", type: "event" }
+];
 // ===== DATA STORE =====
 let db = {
   prints: [],
@@ -1238,6 +1330,22 @@ function renderCalendar() {
       deadlineDates[key].push(p);
     }
   });
+  // 年間予定の合流（設定がオンのときのみ）
+  if (db.settings.chikuma_sync) {
+    schoolEvents.forEach(ev => {
+      const d = new Date(ev.date);
+      if (d.getFullYear() === year && d.getMonth() === month) {
+        const key = d.getDate();
+        if (!deadlineDates[key]) deadlineDates[key] = [];
+        // 行事データをカレンダー用の配列に追加
+        deadlineDates[key].push({
+          title: ev.title,
+          isSchoolEvent: true,
+          type: ev.type
+        });
+      }
+    });
+  }
   const daysEl=document.getElementById('calDays');
   let html='';
   for (let i=0;i<firstDay;i++) html+=`<div class="cal-day other-month"></div>`;
